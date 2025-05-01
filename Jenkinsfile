@@ -1,51 +1,34 @@
 pipeline {
     agent {
-        label 'sai' // Your Jenkins agent label
+        label 'sai' // Replace with your actual Jenkins agent label
     }
 
     environment {
         REPO_URL = 'https://github.com/pavandarisi/kool_form_pack.git'
-        APP_DIR = 'kool_form_pack'
-        DEPLOY_PATH = '/var/www/html'
+        DEPLOY_PATH = '/var/www/html' // Apache's default root
     }
 
     stages {
-        stage('Check Workspace Access') {
-            steps {
-                dir("${WORKSPACE}") {
-                    sh '''
-                    echo "🔍 Checking Jenkins workspace directory permissions..."
-                    echo "WORKSPACE = $WORKSPACE"
-                    mkdir -p $WORKSPACE/test
-                    touch $WORKSPACE/test/testfile.txt
-                    ls -la $WORKSPACE/test
-                    '''
-                }
-            }
-        }
-
         stage('Clone Repository') {
             steps {
-                dir("${WORKSPACE}") {
-                    sh 'rm -rf $APP_DIR'
-                    sh 'git clone $REPO_URL $APP_DIR'
-                }
+                echo "📥 Cloning repo..."
+                git branch: 'main', url: "${REPO_URL}"
             }
         }
 
         stage('Deploy to Apache') {
             steps {
-                dir("${WORKSPACE}") {
-                    sh '''
-                    sudo rm -rf $DEPLOY_PATH/*
-                    sudo cp -r $APP_DIR/* $DEPLOY_PATH/
-                    '''
-                }
+                echo "🚀 Deploying static files to Apache root..."
+                sh '''
+                sudo rm -rf ${DEPLOY_PATH}/*
+                sudo cp -r * ${DEPLOY_PATH}/
+                '''
             }
         }
 
         stage('Restart Apache') {
             steps {
+                echo "🔄 Restarting Apache..."
                 sh 'sudo systemctl restart apache2'
             }
         }
@@ -53,10 +36,10 @@ pipeline {
 
     post {
         success {
-            echo "✅ Static site deployed to Apache. Visit: http://<agent-ip>/"
+            echo "✅ Deployment complete. Visit: http://<agent-ip>/"
         }
         failure {
-            echo "❌ Deployment failed. Check pipeline logs."
+            echo "❌ Deployment failed. Check pipeline logs for details."
         }
     }
 }
