@@ -1,28 +1,46 @@
 pipeline {
     agent {
-        label 'sai' // Replace with your actual Jenkins agent label
+        label 'sai' // Your Jenkins agent label
     }
 
     environment {
         REPO_URL = 'https://github.com/pavandarisi/kool_form_pack.git'
-        APP_DIR = 'kool_form_pack'            // relative to workspace
-        DEPLOY_PATH = '/var/www/html'         // Apache default root
+        APP_DIR = 'kool_form_pack'
+        DEPLOY_PATH = '/var/www/html'
     }
 
     stages {
+        stage('Check Workspace Access') {
+            steps {
+                dir("${WORKSPACE}") {
+                    sh '''
+                    echo "🔍 Checking Jenkins workspace directory permissions..."
+                    echo "WORKSPACE = $WORKSPACE"
+                    mkdir -p $WORKSPACE/test
+                    touch $WORKSPACE/test/testfile.txt
+                    ls -la $WORKSPACE/test
+                    '''
+                }
+            }
+        }
+
         stage('Clone Repository') {
             steps {
-                sh 'rm -rf $APP_DIR'
-                sh 'git clone $REPO_URL $APP_DIR'
+                dir("${WORKSPACE}") {
+                    sh 'rm -rf $APP_DIR'
+                    sh 'git clone $REPO_URL $APP_DIR'
+                }
             }
         }
 
         stage('Deploy to Apache') {
             steps {
-                sh '''
-                sudo rm -rf $DEPLOY_PATH/*
-                sudo cp -r $APP_DIR/* $DEPLOY_PATH/
-                '''
+                dir("${WORKSPACE}") {
+                    sh '''
+                    sudo rm -rf $DEPLOY_PATH/*
+                    sudo cp -r $APP_DIR/* $DEPLOY_PATH/
+                    '''
+                }
             }
         }
 
