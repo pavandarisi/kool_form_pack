@@ -5,8 +5,8 @@ pipeline {
 
     environment {
         REPO_URL = 'https://github.com/pavandarisi/kool_form_pack.git'
-        APP_DIR = '/home/ubuntu/'         // local directory to clone into
-        DEPLOY_PATH = '/var/www/html'   // Apache default root
+        APP_DIR = 'kool_form_pack'            // relative to workspace
+        DEPLOY_PATH = '/var/www/html'         // Apache default root
     }
 
     stages {
