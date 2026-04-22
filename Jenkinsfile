@@ -15,14 +15,14 @@ stages {
             git branch: 'main', url: 'https://github.com/pavandarisi/kool_form_pack.git'
         }
     }
-    
+
     stage('Build Docker Image') {
         steps {
             echo "Building Docker image..."
             sh "docker build -t ${DOCKER_IMAGE}:${TAG} ."
         }
     }
-    
+
     stage('Login to Docker Hub') {
         steps {
             echo "Logging into Docker Hub..."
@@ -35,14 +35,14 @@ stages {
             }
         }
     }
-    
+
     stage('Push Docker Image') {
         steps {
             echo "Pushing Docker image to Docker Hub..."
             sh "docker push ${DOCKER_IMAGE}:${TAG}"
         }
     }
-    
+
     stage('Deploy Container') {
         steps {
             echo "Deploying container..."
